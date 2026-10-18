@@ -20,6 +20,8 @@ for arch in $ARCHS; do
 done
 lipo -create "${swift_bins[@]}" -output "$APP/Contents/MacOS/OpenTJ"
 lipo -create "${go_bins[@]}" -output "$APP/Contents/Resources/motionvpn"
+bash scripts/icon.sh
+cp build/OpenTJ.icns "$APP/Contents/Resources/"
 cp -R licenses "$APP/Contents/Resources/"
 cp THIRD_PARTY_NOTICES.md "$APP/Contents/Resources/"
 cat > "$APP/Contents/Info.plist" <<PLIST
@@ -31,6 +33,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <key>CFBundleName</key><string>Open TJ</string>
 <key>CFBundleDisplayName</key><string>Open TJ</string>
 <key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleIconFile</key><string>OpenTJ</string>
 <key>CFBundleShortVersionString</key><string>$VERSION</string>
 <key>CFBundleVersion</key><string>$BUILD_NUMBER</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>

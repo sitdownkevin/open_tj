@@ -32,9 +32,9 @@ Apple 公证是外部服务操作，仓库整理过程中没有提交。当前�
 
 ## Git 与发布版本
 
-这是独立本地 Git 仓库，默认 main 分支。尚未配置远程地址。设置自己的 Git 身份后提交，创建空远程仓库并设置 origin，然后 push；验证发布产物后再打版本标签。不要在上级 TJ-VPN 目录整体 git add。
+远程仓库为 https://github.com/sitdownkevin/open_tj，默认 main 分支。推送 main 或手动触发 Actions 会生成可下载的构建产物。修改 VERSION 并提交后，推送对应标签（例如 git tag v0.2.0，再 git push origin v0.2.0），Actions 会测试、构建并创建含 ZIP 与 SHA-256 的 Release。标签必须与 VERSION 一致。
 
-GitHub Actions 在 push/PR 时测试并生成 ad-hoc 双架构预览包，不自动发布，不需要分发证书。CI 需要能下载 go.mod 指定的工具链，且 runner SDK 支持 SwiftUI 源码所用 API；首次远程运行仍需核验。
+GitHub Actions 使用 macos-26 runner，在 push/PR 时测试并生成 ad-hoc 双架构包；版本标签触发自动 Release，无需分发证书。普通构建产物保留 30 天；Release 附件可持续下载。私有仓库需要登录有访问权限的 GitHub 账号。正式 Developer ID 签名与 Apple 公证仍使用上文的 make release 流程。
 
 ## 许可与用户数据
 
