@@ -4,6 +4,8 @@
 
 简洁的 macOS VPN 客户端，支持菜单栏、流量统计和自动重连。
 
+本项目 100% 由 **gpt6-astra** 开发。
+
 ## 下载与使用
 
 1. 在 [Releases](https://github.com/sitdownkevin/open_tj/releases/latest) 下载 `OpenTJ-*.zip`，支持 Apple Silicon 和 Intel，要求 macOS 14 或更新版本。
