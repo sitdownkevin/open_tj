@@ -28,8 +28,6 @@ make release
 
 release 会先执行测试，构建双架构 app，从内到外使用 Hardened Runtime 和安全时间戳签名，提交 Apple 公证，staple 票据并验证 Gatekeeper，最后重新压缩并生成 SHA-256。任何一步失败都不应发布中间产物；最终以命令成功和验收完成为准。
 
-Apple 公证是外部服务操作，仓库整理过程中没有提交。当前机器只有 Command Line Tools，没有验证正式证书、公证账号或正式发行链路。
-
 ## Git 与发布版本
 
 远程仓库为 https://github.com/sitdownkevin/open_tj，默认 main 分支。推送 main 或手动触发 Actions 会生成可下载的构建产物。修改 VERSION 并提交后，推送对应标签（例如 git tag v0.2.0，再 git push origin v0.2.0），Actions 会测试、构建并创建含 ZIP 与 SHA-256 的 Release。标签必须与 VERSION 一致。

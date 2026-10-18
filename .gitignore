@@ -8,3 +8,21 @@
 *.mobileprovision
 *.log
 *.jsonl
+
+# Local credentials and signing material
+*.key
+*.pem
+*.pfx
+*.keychain
+*.keychain-db
+/secrets/
+/credentials/
+
+# Network captures and local tooling
+*.pcap
+*.pcapng
+__pycache__/
+*.pyc
+.venv/
+.idea/
+.vscode/
