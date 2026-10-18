@@ -1,0 +1,10 @@
+.DS_Store
+/build/
+/dist/
+.env
+.env.*
+*.p12
+*.p8
+*.mobileprovision
+*.log
+*.jsonl
