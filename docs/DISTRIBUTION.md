@@ -34,11 +34,11 @@ Apple 公证是外部服务操作，仓库整理过程中没有提交。当前�
 
 远程仓库为 https://github.com/sitdownkevin/open_tj，默认 main 分支。推送 main 或手动触发 Actions 会生成可下载的构建产物。修改 VERSION 并提交后，推送对应标签（例如 git tag v0.2.0，再 git push origin v0.2.0），Actions 会测试、构建并创建含 ZIP 与 SHA-256 的 Release。标签必须与 VERSION 一致。
 
-GitHub Actions 使用 macos-26 runner，在 push/PR 时测试并生成 ad-hoc 双架构包；版本标签触发自动 Release，无需分发证书。普通构建产物保留 30 天；Release 附件可持续下载。私有仓库需要登录有访问权限的 GitHub 账号。正式 Developer ID 签名与 Apple 公证仍使用上文的 make release 流程。
+GitHub Actions 使用 macos-26 runner，在 push/PR 时测试并生成 ad-hoc 双架构包；版本标签触发自动 Release，无需分发证书。普通构建产物保留 30 天；Release 附件可持续下载。公开 Release 附件无需登录即可下载。正式 Developer ID 签名与 Apple 公证仍使用上文的 make release 流程。
 
 ## 许可与用户数据
 
-本应用包包含实际运行依赖的许可证，见 THIRD_PARTY_NOTICES.md。维护者仍需选择项目自身的源码许可证，明确名称与图标使用权限，以及与学校/原厂的关系说明。原厂安装器、反编译材料和真实用户数据不在此仓库中。
+本应用包包含实际运行依赖的许可证，见 THIRD_PARTY_NOTICES.md。本项目采用 MIT 许可证，见根目录 LICENSE；第三方依赖遵循各自许可证。原厂安装器、反编译材料和真实用户数据不在此仓库中。
 
 用户凭据保存在钥匙串，日志位于 ~/Library/Logs/Open TJ。日志可能包含接口、域名、IP 等环境信息，提交 issue 前请脱敏。卸载前先退出客户端，再删除 app；日志、偏好、后端缓存和钥匙串项目不会自动删除。
 

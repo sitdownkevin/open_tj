@@ -23,7 +23,7 @@ lipo -create "${go_bins[@]}" -output "$APP/Contents/Resources/motionvpn"
 bash scripts/icon.sh
 cp build/OpenTJ.icns "$APP/Contents/Resources/"
 cp -R licenses "$APP/Contents/Resources/"
-cp THIRD_PARTY_NOTICES.md "$APP/Contents/Resources/"
+cp LICENSE THIRD_PARTY_NOTICES.md "$APP/Contents/Resources/"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
