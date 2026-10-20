@@ -124,6 +124,19 @@ lint 与 R8 release 构建。`android-v*` 标签会触发完整发布流程；�
 模拟器没有真实校园账号，不能验证认证、DNS、IPv4 出口或 IPv6 泄漏；
 这些项目仍须按下节清单在真机执行。
 
+## GitHub Actions 验证记录
+
+2026-10-20 的[完整流程验证](https://github.com/sitdownkevin/open_tj/actions/runs/39433495309)
+使用 GitHub Ubuntu runner 从源码构建并签名 APK，已完成：
+
+- [x] Gradle Wrapper 校验、15 项 JVM/app 单元测试、Debug/Release lint 和 R8 构建。
+- [x] 独立签名任务使用固定发布密钥，校验 APK v2/v3 签名、证书指纹和 SHA-256。
+- [x] Android 8.0 / API 26 和 Android 16 / API 36 模拟器安装、冷启动和重复覆盖安装。
+- [x] 本地独立 Android 16 arm64 模拟器安装、冷启动和重复覆盖安装签名优化包。
+
+这些安装测试不使用校园账号；真实网络验证来自下节记录的 debug 构建。
+维护者手机上的 debug 包未卸载、未清空数据，也未被不同签名的发布包替换。
+
 ## 真机验证记录
 
 2026-10-20 在 vivo X200 Pro（`V2405A`，Android 16 / API 36）的 debug 构建上使用真实账号
