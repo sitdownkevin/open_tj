@@ -1,0 +1,20 @@
+Open TJ for Android
+Copyright Open TJ contributors.
+Project source is distributed under the MIT License; see LICENSE.txt.
+
+This application includes:
+- Kotlin standard library: Copyright JetBrains s.r.o. and Kotlin contributors.
+- kotlinx.coroutines and kotlinx.serialization: Copyright JetBrains s.r.o.
+  and Kotlin contributors.
+- AndroidX Activity, Lifecycle, Compose and Material 3:
+  Copyright The Android Open Source Project.
+
+These libraries are distributed under the Apache License, Version 2.0;
+see Apache-2.0.txt. Dependency versions are specified by the Gradle build.
+
+Source and notices:
+https://github.com/JetBrains/kotlin
+https://github.com/Kotlin/kotlinx.coroutines
+https://github.com/Kotlin/kotlinx.serialization
+https://android.googlesource.com/platform/frameworks/support/
+https://github.com/sitdownkevin/open_tj

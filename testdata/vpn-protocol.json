@@ -1,0 +1,17 @@
+{
+  "control_packets": [
+    {"command": 1, "parameter": 0, "hex": "450000140000000000ff00000001000000000000"},
+    {"command": 2, "parameter": 3, "hex": "450000140000000000ff00000002000000000003"},
+    {"command": 5, "parameter": 0, "hex": "450000140000000000ff00000005000000000000"}
+  ],
+  "ipv4_values": [
+    {"value": 16777226, "address": "10.0.0.1"},
+    {"value": 33554442, "address": "10.0.0.2"},
+    {"value": "192.168.1.1", "address": "192.168.1.1"}
+  ],
+  "common": {"keepalive_interval": 30},
+  "network": {
+    "client_ipv4": 33554442,
+    "dns_servers": [{"ipv4": [16777226, "10.0.0.53"]}]
+  }
+}

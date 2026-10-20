@@ -1,5 +1,13 @@
 # 架构
 
+## Android
+
+`apps/android/core` 以 Kotlin 实现现有网关协议，`apps/android/app` 通过
+Android `VpnService` 管理系统接口。两端使用 `testdata/vpn-protocol.json`
+验证协议一致性；Android 不运行 macOS helper。详见 [Android 指南](ANDROID.md)。
+
+## macOS
+
 SwiftUI 主进程通过 stdin 向 Go 监督器发送凭据与 stop/sleep/wake 命令，通过 stdout 接收逐行 JSON 事件。凭据存入 macOS 钥匙串。后端会被复制到用户 Application Support 目录执行，延续原来的启动路径。
 
 Go 监督器负责网关认证、TLS 隧道、重连策略、日志与流量事件。它通过 osascript 的管理员授权启动同一可执行文件的 --helper 模式。helper 通过临时 Unix socket 与随机 token 握手，创建 utun，并事务式管理路由、DNS、代理及 IPv6 设置。停止后回滚并返回恢复回执；网络恢复不能确认时停止自动重连。

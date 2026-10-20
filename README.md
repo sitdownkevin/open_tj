@@ -4,6 +4,10 @@
 
 简洁的 macOS VPN 客户端，支持菜单栏、流量统计和自动重连。
 
+Android 预览版位于 `apps/android`，使用原生 Kotlin/Compose 和系统 VPN
+授权，支持 Android 8.0 及以上。功能、构建方式与真机验收见
+[Android 开发指南](docs/ANDROID.md)。
+
 本项目 100% 由 **gpt6-astra** 开发。
 
 ## 下载与使用
@@ -22,6 +26,13 @@
 make test
 make build
 make package
+```
+
+Android（需要 JDK 17 和 Android SDK）：
+
+```sh
+make android-test
+make android
 ```
 
 推送 main 自动测试并构建，可在 [Actions](https://github.com/sitdownkevin/open_tj/actions) 下载产物；推送与 `VERSION` 一致的 `v*` 标签自动发布 Release。更多信息见 [分发指南](docs/DISTRIBUTION.md)。

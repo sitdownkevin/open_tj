@@ -1,0 +1,48 @@
+name: Build Android
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            apps/android/**/*.gradle.kts
+            apps/android/gradle/wrapper/gradle-wrapper.properties
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Test, lint, and build preview
+        run: make android
+      - name: Verify APK checksum
+        working-directory: dist
+        run: sha256sum -c *android-preview.apk.sha256
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: OpenTJ-Android-Preview
+          path: |
+            dist/*android-preview.apk
+            dist/*android-preview.apk.sha256
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: Android-test-reports
+          path: |
+            apps/android/core/build/reports/
+            apps/android/app/build/reports/

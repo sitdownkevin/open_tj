@@ -26,3 +26,11 @@ __pycache__/
 .venv/
 .idea/
 .vscode/
+
+# Android local tools and generated output
+**/.gradle/
+**/.kotlin/
+/apps/android/**/build/
+/apps/android/local.properties
+*.jks
+*.keystore

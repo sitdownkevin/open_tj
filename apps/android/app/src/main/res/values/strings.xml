@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Open TJ</string>
+    <string name="vpn_channel_name">VPN 连接状态</string>
+    <string name="vpn_channel_description">显示连接状态，并可随时断开 VPN</string>
+    <string name="disconnect">断开</string>
+</resources>
