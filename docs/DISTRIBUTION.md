@@ -73,7 +73,9 @@ gh secret set ANDROID_KEY_PASSWORD
 1. 更新 `apps/android/VERSION`、`CHANGELOG.md`、`docs/ANDROID_RELEASE_NOTES.md`，
    并同步 README 中 APK 与 Release 的版本链接。minor/patch 必须小于 100，
    versionCode 使用 `major * 10000 + minor * 100 + patch`，必须比旧版本大。
-2. 提交并推送 `main`，确认 Android CI 测试、lint 和 R8 构建通过。
+2. 提交并推送 `main`，确认 Android CI 测试、lint 和 R8 构建通过。首次配置或
+   调整发布流程后，先在 Actions 手动运行 `main`，验证签名和模拟器安装；
+   手动运行会生成签名附件但不发布 Release。
 3. 创建与版本一致的新标签并推送：
 
 ```sh

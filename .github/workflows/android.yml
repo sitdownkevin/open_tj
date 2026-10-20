@@ -63,7 +63,7 @@ jobs:
 
   sign:
     name: Sign with persistent release key
-    if: startsWith(github.ref, 'refs/tags/android-v')
+    if: startsWith(github.ref, 'refs/tags/android-v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -159,6 +159,7 @@ jobs:
 
   publish:
     name: Publish downloadable APK
+    if: startsWith(github.ref, 'refs/tags/android-v')
     needs: [sign, smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 10

@@ -15,7 +15,7 @@ test -s "$APK"
 BADGING="$("$SDK/build-tools/35.0.0/aapt2" dump badging "$APK")"
 [[ "$BADGING" == *"package: name='$APP_ID'"* ]]
 [[ "$BADGING" == *"versionName='$VERSION'"* ]]
-[[ "$BADGING" == *"sdkVersion:'26'"* ]]
+[[ "$BADGING" == *"minSdkVersion:'26'"* ]]
 [[ "$BADGING" != *"application-debuggable"* ]]
 
 adb install -r "$APK"

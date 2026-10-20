@@ -87,7 +87,8 @@ cd apps/android
 ## GitHub Actions 发布
 
 `.github/workflows/android.yml` 在 `main`、PR 和手动触发时运行单测、Debug/Release
-lint 与 R8 release 构建。只在 `android-v*` 标签上读取发布密钥，流程如下：
+lint 与 R8 release 构建。`android-v*` 标签会触发完整发布流程；维护者手动在
+`main` 运行时，也会签名并执行安装测试，但不创建 Release。流程如下：
 
 1. 标签必须与 `apps/android/VERSION` 相符。
 2. 构建未签名 APK，将产物传给独立签名 job。
