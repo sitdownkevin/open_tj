@@ -1,4 +1,4 @@
-.PHONY: build test package release android android-test android-release
+.PHONY: build test package release android android-test android-release android-sign
 build:
 	bash scripts/build.sh
 test:
@@ -13,3 +13,5 @@ android-test:
 	bash scripts/android.sh test
 android-release:
 	bash scripts/android.sh release
+android-sign:
+	bash scripts/android-sign.sh

@@ -7,6 +7,9 @@
 - 支持 Android Keystore 凭据加密、底层网络切换与分类自动重连。
 - 修复部分厂商在 TUN 建立前拒绝 `protect` 导致的持续重连，并安全忽略 IPv6 首包。
 - 添加 Android 测试、打包、CI 和真机验收文档。
+- Android 使用独立版本文件和 `android-v*` 标签；GitHub Actions 自动构建、
+  固定密钥签名并验证 Android 8/16 安装后发布可直接下载的 APK。
+- 统一 Android 产物目录为 `dist/android`，提供公开签名指纹及 SHA-256 校验文件。
 
 ## 0.2.1
 

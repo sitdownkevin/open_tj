@@ -7,4 +7,8 @@
 Android 预览版使用系统 VpnService，无管理员 helper；密码通过 Android Keystore
 密钥加密，账号存储不参与备份。日志仅保留在进程内存中。连接期间阻止 IPv6，
 但断线重连会释放 VPN 接口，不提供跨重连期间的 kill switch。
-开发预览 APK 使用 debug 签名，正式分发应使用固定的 release 签名密钥。
+GitHub Release APK 使用固定 release 密钥签名，签名指纹记录于
+apps/android/release-certificate.sha256。私钥与密码仅保存在维护者的私密备份和
+GitHub Actions Secrets；PR 构建不接触签名密钥。APK 发布前校验指纹、SHA-256
+和 Android 8/16 安装测试。make android 生成的本地开发包仍使用 debug 签名，
+与 Release 签名不同，不能直接互相覆盖。

@@ -2,6 +2,8 @@
 
 每次发布记录版本、commit、系统版本、CPU 架构和执行结果。未执行的项保持未勾选。
 
+## macOS
+
 - [ ] make test 通过，make package 成功，校验和有效。
 - [ ] 正式证书签名、公证、stapler 与 Gatekeeper 验证通过。
 - [ ] 在新用户账户或干净机器，从下载渠道获取并安装应用。
@@ -14,3 +16,15 @@
 - [ ] 发布说明、许可证、第三方通知及最终 ZIP/SHA-256 齐全。
 
 网络验收会改变主机网络，需要在可恢复的测试环境运行。单元测试不执行真实 VPN 登录或管理员网络修改。
+
+## Android
+
+- [ ] `apps/android/VERSION`、`android-v*` 标签和 README 下载链接一致，versionCode 递增。
+- [ ] Actions 单测、Debug/Release lint 和 R8 构建通过。
+- [ ] 固定发布签名与 `release-certificate.sha256` 匹配，APK SHA-256 正确。
+- [ ] 签名 APK 在 Android 8/16 模拟器安装、冷启动和覆盖安装通过。
+- [ ] Release APK 可匿名下载，文件与 Actions 的签名构建产物一致。
+- [ ] 从上一正式签名版本升级后，账号和配置保留。
+- [ ] 正式签名包的真实账号连接、DNS、校园网站、IPv4 出口与 IPv6 阻断验证。
+- [ ] 更多厂商设备、锁屏后台、通知断开、系统撤销授权及长时间运行。
+- [ ] 发布说明写明预览状态和未完成的测试，私钥已在仓库外另行备份。

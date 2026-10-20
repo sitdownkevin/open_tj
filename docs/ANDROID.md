@@ -2,7 +2,19 @@
 
 Android 客户端位于 `apps/android`，支持 Android 8.0（API 26）及以上。
 应用 ID 为 `io.github.sitdownkevin.opentj`。本阶段为 Android 预览版；
-macOS 的版本号与发布流程保持独立，Android 的显示版本附带 `android-preview`。
+版本维护于 `apps/android/VERSION`，与 macOS 版本和发布标签独立。
+GitHub Release 提供固定密钥签名的 APK，本地 debug 版本名附带 `-dev`。
+
+## 用户安装
+
+从仓库 README 的「下载 APK」入口获取 `.apk`，在手机上安装后输入自己的
+校园 VPN 账号并同意系统 VPN 授权即可连接。无需电脑、ADB 或本地编译。
+系统如提示未知来源，按提示允许当前下载来源安装；不需要关闭系统安全保护。
+Release 中的校验和与签名证书指纹用于核对下载文件。
+
+后续 Release APK 使用同一发布密钥，可直接覆盖升级。早期 debug 安装包
+签名不同，不能与 Release 互相覆盖；迁移前需保管好账号信息。调试时不得
+通过卸载或清空用户数据来绕过签名不匹配。
 
 ## 架构
 
@@ -54,15 +66,17 @@ Gradle Wrapper 固定为 8.13 并校验分发包 SHA-256；AGP 为 8.13.2。
 
 ```sh
 make android-test
-make android
+make android          # dist/android/debug/
+make android-release  # dist/android/unsigned/
 ```
 
-预览 APK 和校验和输出到 `dist/OpenTJ-<VERSION>-android-preview.apk`。
-它使用本机 Android debug key，适合安装测试；不是正式分发签名。
-不同机器/CI 的 debug key 不同，不能保证直接覆盖安装。
+`make android` 输出 `dist/android/debug/OpenTJ-<VERSION>-android-debug.apk`。
+它使用本机 Android debug key，仅适合开发。普通用户应下载 Release APK。
+`make android-release` 输出 `dist/android/unsigned/OpenTJ-<VERSION>-android-unsigned.apk`，
+经过 R8 优化，但在签名前不能安装。
 
 ```sh
-adb install -r dist/OpenTJ-0.2.1-android-preview.apk
+adb install -r dist/android/debug/OpenTJ-0.2.1-android-debug.apk
 cd apps/android
 ./gradlew connectedDebugAndroidTest
 ```
@@ -70,10 +84,29 @@ cd apps/android
 设备测试会验证 Android Keystore 加解密和删除。它应在专用测试安装上运行，
 会清理该测试应用的已存账号设置，不会连接真实 VPN。
 
-`make android-release` 输出经过 R8 优化的未签名 release APK。
-正式发布需使用自己保管的固定签名密钥签名并校验，密钥不可提交到仓库。
-可用 `ANDROID_VERSION_CODE` 提供递增版本码。Android CI 单独上传预览产物，
-不会修改既有 macOS GitHub Release。
+## GitHub Actions 发布
+
+`.github/workflows/android.yml` 在 `main`、PR 和手动触发时运行单测、Debug/Release
+lint 与 R8 release 构建。只在 `android-v*` 标签上读取发布密钥，流程如下：
+
+1. 标签必须与 `apps/android/VERSION` 相符。
+2. 构建未签名 APK，将产物传给独立签名 job。
+3. `make android-sign` 使用固定密钥进行 zipalign 与 APK v2/v3 签名，校验公开
+   证书指纹、签名与文件 SHA-256。缺少密钥或指纹不匹配时立即失败。
+4. Android API 26 和 36 模拟器安装、启动、再次覆盖安装同一签名 APK。
+5. 所有检查通过后，发布 APK、APK SHA-256 和证书指纹到独立 Android prerelease。
+   不替换已有发布附件，也不改变 macOS 的 Latest Release。
+
+维护者首次需要配置 `ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、
+`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD` 四个仓库 Actions Secrets。
+公开证书指纹位于 `apps/android/release-certificate.sha256`，私钥必须保存在仓库外
+并另行备份。具体配置、更新下载链接和推送标签步骤见 [分发指南](DISTRIBUTION.md)。
+
+本地签名使用同名密码与 alias 环境变量，以及指向私钥文件的 `ANDROID_KEYSTORE_FILE`：
+先运行 `make android-release`，再运行 `make android-sign`；最终 APK 输出到
+`dist/android/release`。不要在公开 shell 日志中打印密钥或密码。
+版本码由 `major * 10000 + minor * 100 + patch` 计算，minor/patch 须小于 100；
+升级需提高 `apps/android/VERSION`。
 
 ## 开发环境检查记录
 
@@ -92,7 +125,7 @@ cd apps/android
 
 ## 真机验证记录
 
-2026-10-20 在 vivo X200 Pro（`V2405A`，Android 16 / API 36）上使用真实账号
+2026-10-20 在 vivo X200 Pro（`V2405A`，Android 16 / API 36）的 debug 构建上使用真实账号
 完成以下检查：
 
 - [x] Wi-Fi 下 `protect` 返回 `false` 时，绑定选定底层网络后 TLS 登录、配置读取

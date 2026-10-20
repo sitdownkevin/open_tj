@@ -34,3 +34,9 @@ __pycache__/
 /apps/android/local.properties
 *.jks
 *.keystore
+*.apk
+*.aab
+*.apks
+*.idsig
+*.jks.base64
+*.keystore.base64

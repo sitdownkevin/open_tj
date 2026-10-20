@@ -1,22 +1,31 @@
-name: Build Android
+name: Android APK
 
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ['android-v*']
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/android-v') }}
+
 jobs:
-  android:
+  build:
+    name: Test and build release
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-java@v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '17'
@@ -24,25 +33,145 @@ jobs:
           cache-dependency-path: |
             apps/android/**/*.gradle.kts
             apps/android/gradle/wrapper/gradle-wrapper.properties
+      - name: Check Android release version
+        if: startsWith(github.ref, 'refs/tags/android-v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: test "$RELEASE_TAG" = "android-v$(tr -d '\r\n' < apps/android/VERSION)"
       - name: Install Android SDK packages
         run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
-      - name: Test, lint, and build preview
-        run: make android
-      - name: Verify APK checksum
-        working-directory: dist
-        run: sha256sum -c *android-preview.apk.sha256
-      - uses: actions/upload-artifact@v7.0.2
+      - name: Test, lint and build optimized APK
+        run: make android-release
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: OpenTJ-Android-Preview
-          path: |
-            dist/*android-preview.apk
-            dist/*android-preview.apk.sha256
+          name: android-unsigned-${{ github.sha }}
+          path: dist/android/unsigned/
           if-no-files-found: error
-          retention-days: 30
-      - uses: actions/upload-artifact@v7.0.2
-        if: failure()
+          retention-days: 7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
         with:
-          name: Android-test-reports
+          name: android-test-reports-${{ github.sha }}
           path: |
             apps/android/core/build/reports/
             apps/android/app/build/reports/
+          retention-days: 7
+
+  sign:
+    name: Sign with persistent release key
+    if: startsWith(github.ref, 'refs/tags/android-v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: android-unsigned-${{ github.sha }}
+          path: dist/android/unsigned
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: sdkmanager "build-tools;35.0.0"
+      - name: Verify input APK checksum
+        working-directory: dist/android/unsigned
+        run: sha256sum -c *.apk.sha256
+      - name: Sign and verify release APK
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${ANDROID_KEYSTORE_BASE64:?Missing Android signing secrets}"
+          umask 077
+          export ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/opentj-release.jks"
+          trap 'rm -f "$ANDROID_KEYSTORE_FILE"' EXIT
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_FILE"
+          make android-sign
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-signed-${{ github.sha }}
+          path: dist/android/release/
+          if-no-files-found: error
+          retention-days: 30
+
+  smoke:
+    name: Install APK on Android API ${{ matrix.api }}
+    needs: sign
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [26, 36]
+    env:
+      ANDROID_SERIAL: emulator-5554
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: android-signed-${{ github.sha }}
+          path: dist/android/release
+      - name: Verify signed APK checksum
+        working-directory: dist/android/release
+        run: sha256sum -c *.apk.sha256
+      - name: Install APK inspection tools
+        run: sdkmanager "build-tools;35.0.0"
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install, launch and reinstall the signed release
+        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808 # v2.38.0
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          ram-size: 2048M
+          heap-size: 256M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -port 5554
+          disable-animations: true
+          script: bash scripts/android-smoke.sh
+
+  publish:
+    name: Publish downloadable APK
+    needs: [sign, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: android-signed-${{ github.sha }}
+          path: dist/android/release
+      - name: Verify downloaded APK checksum
+        working-directory: dist/android/release
+        run: sha256sum -c *.apk.sha256
+      - name: Publish APK and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < apps/android/VERSION)"
+          # Release tags are immutable; a new build must use a new version.
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists; refusing to replace published APKs" >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" dist/android/release/* \
+            --verify-tag --draft --prerelease --latest=false \
+            --title "Open TJ Android $version" --notes-file docs/ANDROID_RELEASE_NOTES.md
+          gh release edit "$RELEASE_TAG" --draft=false

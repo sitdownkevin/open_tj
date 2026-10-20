@@ -4,8 +4,13 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-val projectVersion = rootProject.file("../../VERSION").readText().trim()
+val projectVersion = rootProject.file("VERSION").readText().trim()
+require(Regex("""\d+\.\d{1,2}\.\d{1,2}""").matches(projectVersion)) {
+    "Android VERSION must be major.minor.patch; minor and patch must be below 100"
+}
 val versionParts = projectVersion.split(".").map(String::toInt)
+val androidVersionCode = versionParts[0].toLong() * 10000 + versionParts[1] * 100 + versionParts[2]
+require(androidVersionCode in 1..2100000000L) { "Android versionCode is out of range" }
 
 android {
     namespace = "io.github.sitdownkevin.opentj"
@@ -15,9 +20,8 @@ android {
         applicationId = "io.github.sitdownkevin.opentj"
         minSdk = 26
         targetSdk = 36
-        versionCode = providers.environmentVariable("ANDROID_VERSION_CODE").orNull?.toInt()
-            ?: (versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2])
-        versionName = "$projectVersion-android-preview"
+        versionCode = androidVersionCode.toInt()
+        versionName = projectVersion
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,6 +36,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "-dev"
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
